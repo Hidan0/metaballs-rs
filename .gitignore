@@ -1,0 +1,6 @@
+target/
+
+examples/**/target/
+examples/**/out/
+examples/**/output/
+examples/**/*.mp4
