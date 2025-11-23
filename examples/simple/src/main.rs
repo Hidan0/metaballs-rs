@@ -9,21 +9,28 @@ fn main() {
     let mut app = Metaballs::setup();
     let delta_t = 1. / FPS as f32;
 
-    app.update(&[]).unwrap();
+    app.update(&[
+        Action::MoveBallTo {
+            id: 0,
+            x: 200,
+            y: BUFFER_HEIGHT as u32 - 200,
+        },
+        Action::MoveBallTo {
+            id: 1,
+            x: (BUFFER_WIDTH as f32 * 0.5) as u32,
+            y: (BUFFER_HEIGHT as f32 * 0.5) as u32,
+        },
+    ])
+    .unwrap();
+
+    let force = (350., -150.);
 
     for i in 0..FRAMES_NUM {
-        app.update(&[
-            Action::MoveBall {
-                id: 0,
-                x: (400. * delta_t) as i32,
-                y: 0,
-            },
-            Action::MoveBall {
-                id: 1,
-                x: (-200. * delta_t) as i32,
-                y: (-150. * delta_t) as i32,
-            },
-        ])
+        app.update(&[Action::MoveBall {
+            id: 0,
+            x: (force.0 * delta_t) as i32,
+            y: (force.1 * delta_t) as i32,
+        }])
         .unwrap();
 
         let f_name = format!("out/output-{:02}.ppm", i);
