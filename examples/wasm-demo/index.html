@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Metaballs</title>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #1e1e2e;
+        color: #cdd6f4;
+        font-family: monospace;
+      }
+      .controls {
+        margin-top: 20px;
+        text-align: center;
+      }
+      .controls p {
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="1280" height="720"></canvas>
+    <div class="controls">
+      <p>Hold left mouse button and move to drag the ball</p>
+      <p>Arrow keys: Move the ball</p>
+      <p>FPS: <span id="fps">0</span> | Delta: <span id="delta">0</span>ms</p>
+    </div>
+
+    <script type="module">
+      import init, { MetaballsWeb } from "./pkg/wasm_demo.js";
+
+      async function run() {
+        await init();
+
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const app = new MetaballsWeb();
+
+        const fpsDisplay = document.getElementById("fps");
+        const deltaDisplay = document.getElementById("delta");
+
+        let lastTime = performance.now();
+        const MOVE_SPEED = 200;
+
+        const keysPressed = new Set();
+
+        let isMouseDown = false;
+        let mouseX = 0;
+        let mouseY = 0;
+
+        function animate(currentTime) {
+          const deltaTime = (currentTime - lastTime) / 1000;
+          lastTime = currentTime;
+
+          const actions = [];
+
+          let dx = 0,
+            dy = 0;
+          if (keysPressed.has("ArrowUp")) dy -= MOVE_SPEED;
+          if (keysPressed.has("ArrowDown")) dy += MOVE_SPEED;
+          if (keysPressed.has("ArrowLeft")) dx -= MOVE_SPEED;
+          if (keysPressed.has("ArrowRight")) dx += MOVE_SPEED;
+
+          if (dx !== 0 || dy !== 0) {
+            actions.push({ type: "MovePlayerBy", x: dx, y: dy });
+          }
+
+          if (isMouseDown) {
+            actions.push({ type: "MovePlayerTo", x: mouseX, y: mouseY });
+          }
+
+          try {
+            app.update(actions, deltaTime);
+            app.render(ctx);
+          } catch (e) {
+            console.error("Error:", e);
+          }
+
+          fpsDisplay.textContent = Math.round(1 / deltaTime);
+          deltaDisplay.textContent = (deltaTime * 1000).toFixed(2);
+
+          requestAnimationFrame(animate);
+        }
+
+        canvas.addEventListener("mousedown", (e) => {
+          if (e.button === 0) {
+            isMouseDown = true;
+            const rect = canvas.getBoundingClientRect();
+            mouseX = Math.floor(e.clientX - rect.left);
+            mouseY = Math.floor(e.clientY - rect.top);
+          }
+        });
+
+        canvas.addEventListener("mouseup", (e) => {
+          if (e.button === 0) {
+            isMouseDown = false;
+          }
+        });
+
+        canvas.addEventListener("mouseleave", () => {
+          isMouseDown = false;
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+          const rect = canvas.getBoundingClientRect();
+          mouseX = Math.floor(e.clientX - rect.left);
+          mouseY = Math.floor(e.clientY - rect.top);
+        });
+
+        window.addEventListener("keydown", (e) => {
+          if (
+            ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)
+          ) {
+            e.preventDefault();
+            keysPressed.add(e.key);
+          }
+        });
+
+        window.addEventListener("keyup", (e) => {
+          if (
+            ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)
+          ) {
+            keysPressed.delete(e.key);
+          }
+        });
+
+        animate(performance.now());
+      }
+
+      run();
+    </script>
+  </body>
+</html>

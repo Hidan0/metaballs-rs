@@ -1,0 +1,12 @@
+[package]
+name = "wasm-demo"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+metaballs-rs = { path = "../../" }
+wasm-bindgen = "0.2.105"
+web-sys = { version = "0.3.82", features = ["CanvasRenderingContext2d", "ImageData", "Window", "Document", "HtmlCanvasElement"] }
+
+[lib]
+crate-type = ["cdylib", "rlib"]
