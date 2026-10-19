@@ -73,7 +73,7 @@ pub struct Metaballs {
     orbit_r: f32,
 }
 
-impl<'a> Metaballs {
+impl Metaballs {
     pub fn setup() -> Self {
         let half_h = (0.5 * BUFFER_HEIGHT as f32) as i32;
         let half_w = (0.5 * BUFFER_WIDTH as f32) as i32;
@@ -113,11 +113,11 @@ impl<'a> Metaballs {
         }
     }
 
-    pub fn buffer(&'a self) -> &'a [Pixel] {
+    pub fn buffer(&self) -> &[Pixel] {
         &self.buf
     }
 
-    pub fn update(&'a mut self, actions: &[Action], dt: f32) {
+    pub fn update(&mut self, actions: &[Action], dt: f32) {
         for action in actions {
             match *action {
                 Action::MovePlayerBy { x, y } => {
@@ -152,7 +152,7 @@ impl<'a> Metaballs {
         self.draw();
     }
 
-    fn draw(&'a mut self) {
+    fn draw(&mut self) {
         let ths: f32 = 0.2; // ???
 
         for y in 0..BUFFER_HEIGHT {
